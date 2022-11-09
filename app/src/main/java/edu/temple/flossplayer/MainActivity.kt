@@ -1,5 +1,6 @@
 package edu.temple.flossplayer
 
+import android.app.SearchManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -20,6 +21,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         bookViewModel.setBookList(getBookList())
+
+        //receiving the query
+        if (Intent.ACTION_SEARCH == intent.action)
+        {
+            intent.getStringExtra(SearchManager.QUERY)?.also{ query ->
+                doMySearch(query)
+            }
+        }
 
         // If we're switching from one container to two containers
         // clear BookPlayerFragment from container1
@@ -74,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun getBookList() : BookList {
         val bookList = BookList()
         repeat (10) {
-            bookList.add(Book("Book ${it + 1}", "Author ${10 - it}"))
+//            bookList.add(Book("Book ${it + 1}", "Author ${10 - it}"))
         }
 
         return bookList
