@@ -1,5 +1,6 @@
 package edu.temple.flossplayer
 
+import android.app.DownloadManager.Request
 import android.app.SearchManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,19 +8,20 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.content.Intent
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.RequestQueue
+import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.NonCancellable.start
 
 
 class MainActivity : AppCompatActivity() {
 
-    var url = "https://kamorris.com/lab/flossplayer/search.php?query=search_term" //correct URL?
-
-    //private val JARGON: String = ""
+    private val url = "https://kamorris.com/lab/flossplayer/search.php?query=" //correct URL?
 
     //for search button
-    private var buttonSearch: Button = findViewById(R.id.SearchButton)
+    private lateinit var buttonSearch: Button
 
     private val isSingleContainer : Boolean by lazy{
         findViewById<View>(R.id.container2) == null
@@ -30,33 +32,23 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        bookViewModel.setBookList(getBookList())
+        bookViewModel.setBookList(BookList())
+        buttonSearch = findViewById(R.id.SearchButton)
 
-        val queue: RequestQueue = Volley.newRequestQueue(applicationContext) //need?
+        val queue = Volley.newRequestQueue(this) //need?
+
 
         //when search button is clicked...
         buttonSearch.setOnClickListener {
-            fun onClick() {
-                onSearchRequested()
-            }
-        }
-
-        //receiving the query...check
-        if (Intent.ACTION_SEARCH == intent.action)
-        {
-            intent.getStringExtra(SearchManager.QUERY)?.also{ query ->
-                doMySearch(query)
-            }
+            onSearchRequested()
         }
 
         //type-to-search functionality
-        setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
+       setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
 
         // If we're switching from one container to two containers
         // clear BookPlayerFragment from container1
@@ -100,17 +92,39 @@ class MainActivity : AppCompatActivity() {
                 bookViewModel.markSelectedBookViewed()
             }
         }
+
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        setIntent(intent)
+        handleIntent(intent)
+        super.onNewIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        //receiving the query...check
+        if (Intent.ACTION_SEARCH == intent?.action)
+        {
+            intent.getStringExtra(SearchManager.QUERY)?.also{ query ->
+                doMySearch(url+query)
+            }
+        }
+    }
+
+    private fun doMySearch(s: String) {
+        Toast.makeText(this@MainActivity, s, Toast.LENGTH_LONG).show()
     }
 
     //check with this
     //val jargon: Boolean = intent.getBundleExtra(SearchManager.APP_DATA)?.getBoolean(JARGON) ?: false
-    override fun onSearchRequested(): Boolean {
-        val appData = Bundle().apply {
-            //putBoolean(JARGON, true)
-        }
-        startSearch(null, false, appData, false)
-        return true
-    }
+//    override fun onSearchRequested(): Boolean {
+////        val appData = Bundle().apply {
+////            //putBoolean(JARGON, true)
+////        }
+//        startSearch(null, false, appData, false)
+//        return true
+//    }
 
     override fun onBackPressed() {
         // BackPress clears the selected book
@@ -118,12 +132,4 @@ class MainActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    private fun getBookList() : BookList {
-        val bookList = BookList()
-        repeat (10) {
-//            bookList.add(Book("Book ${it + 1}", "Author ${10 - it}"))
-        }
-
-        return bookList
-    }
 }
