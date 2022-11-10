@@ -8,22 +8,29 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.coroutines.NonCancellable.start
+import org.json.JSONException
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val url = "https://kamorris.com/lab/flossplayer/search.php?query=" //correct URL?
+    private val url = "https://kamorris.com/lab/flossplayer/search.php?query="
 
     //for search button
     private lateinit var buttonSearch: Button
 
-    private val isSingleContainer : Boolean by lazy{
+    val volleyQueue : RequestQueue by lazy {
+        Volley.newRequestQueue(this)
+    }
+
+    private val isSingleContainer : Boolean by lazy {
         findViewById<View>(R.id.container2) == null
     }
 
@@ -39,8 +46,6 @@ class MainActivity : AppCompatActivity() {
         bookViewModel.setBookList(BookList())
         buttonSearch = findViewById(R.id.SearchButton)
 
-        val queue = Volley.newRequestQueue(this) //need?
-
 
         //when search button is clicked...
         buttonSearch.setOnClickListener {
@@ -48,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //type-to-search functionality
-       setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
+//       setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
 
         // If we're switching from one container to two containers
         // clear BookPlayerFragment from container1
@@ -82,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         // Respond to selection in portrait mode using flag stored in ViewModel
         bookViewModel.getSelectedBook()?.observe(this){
             if (!bookViewModel.hasViewedSelectedBook()) {
-                if (isSingleContainer) {
+                if (isSingleContainer && it != null) {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.container1, BookPlayerFragment())
                         .setReorderingAllowed(true)
@@ -112,8 +117,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun doMySearch(s: String) {
-        Toast.makeText(this@MainActivity, s, Toast.LENGTH_LONG).show()
+    private fun doMySearch(url: String) {
+        volleyQueue.add (
+            JsonObjectRequest(
+                com.android.volley.Request.Method.GET
+                , url
+                , null
+                , {
+                    try {
+                        // TODO: get books and parse them, update viewModel, clearSelectedBook
+
+                    } catch (e : JSONException) {
+                        e.printStackTrace()
+                    }
+                }
+                , {
+                    Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show()
+                })
+        )
+
+
     }
 
     //check with this
