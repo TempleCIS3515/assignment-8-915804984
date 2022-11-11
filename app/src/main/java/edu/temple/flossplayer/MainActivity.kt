@@ -9,10 +9,13 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import org.json.JSONException
+import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
@@ -121,7 +124,19 @@ class MainActivity : AppCompatActivity() {
                 , {
                     try {
                         // TODO: get books and parse them, update viewModel, clearSelectedBook
-
+                        val bookList = BookList()
+                        var nextBook: JSONObject
+                        for (i in 0 until it.length()) {
+                            nextBook = it.getJSONObject(i.toString())
+                            bookList.add(
+                                Book(
+                                    nextBook.getString("book_title"),
+                                    nextBook.getString("author_name"),
+                                    nextBook.getInt("book_id"),
+                                    nextBook.getString("cover_uri")
+                                )
+                            )
+                        }
                         bookViewModel.setBookList(BookList())
                         bookViewModel.clearSelectedBook()
 
@@ -133,8 +148,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show()
                 })
         )
-
-
     }
 
     //check with this
