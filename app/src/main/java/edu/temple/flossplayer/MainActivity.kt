@@ -1,21 +1,17 @@
 package edu.temple.flossplayer
 
-import android.app.DownloadManager.Request
 import android.app.SearchManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.TextView
 import android.content.Intent
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import kotlinx.coroutines.NonCancellable.start
+import com.squareup.picasso.Picasso
 import org.json.JSONException
 
 
@@ -37,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     private val bookViewModel : BookViewModel by lazy {
         ViewModelProvider(this)[BookViewModel::class.java]
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,6 +121,9 @@ class MainActivity : AppCompatActivity() {
                 , {
                     try {
                         // TODO: get books and parse them, update viewModel, clearSelectedBook
+
+                        bookViewModel.setBookList(BookList())
+                        bookViewModel.clearSelectedBook()
 
                     } catch (e : JSONException) {
                         e.printStackTrace()

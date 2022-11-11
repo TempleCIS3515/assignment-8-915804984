@@ -35,6 +35,7 @@ class BookListFragment : Fragment() {
             // Update the ViewModel
                 book: Book ->
             bookViewModel.setSelectedBook(book)
+
             // Inform the activity of the selection so as to not have the event replayed
             // when the activity is restarted
         }
@@ -44,6 +45,7 @@ class BookListFragment : Fragment() {
 
             bookViewModel.getBookList().observe(requireActivity()) {
                 adapter = BookListAdapter(it, onClick)
+                adapter?.notifyDataSetChanged()
             }
         }
 

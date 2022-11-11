@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import com.squareup.picasso.Picasso
 
 class BookFragment : Fragment() {
     private lateinit var titleTextView: TextView
@@ -32,7 +33,7 @@ class BookFragment : Fragment() {
         book?.run {
             titleTextView.text = title
             authorTextView.text = author
-            bookImageView.setImageResource(R.drawable.ic_launcher_background)
+            Picasso.get().load(coverURL) //this will load image
         }
     }
 
