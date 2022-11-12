@@ -14,13 +14,12 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
-
-    private val url = "https://kamorris.com/lab/flossplayer/search.php?query="
 
     //for search button
     private lateinit var buttonSearch: Button
@@ -105,19 +104,20 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
     }
 
-    private fun handleIntent(intent: Intent?) {
+     fun handleIntent(intent: Intent?) {
         //receiving the query...check
         if (Intent.ACTION_SEARCH == intent?.action)
         {
             intent.getStringExtra(SearchManager.QUERY)?.also{ query ->
-                doMySearch(url+query)
+                doMySearch(query)
             }
         }
     }
 
-    private fun doMySearch(url: String) {
+    private fun doMySearch(i: String) {
+        val url = "https://kamorris.com/lab/flossplayer/search.php?query=${i}"
         volleyQueue.add (
-            JsonObjectRequest(
+            JsonArrayRequest(
                 com.android.volley.Request.Method.GET
                 , url
                 , null
@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                         val bookList = BookList()
                         var nextBook: JSONObject
                         for (i in 0 until it.length()) {
-                            nextBook = it.getJSONObject(i.toString())
+                            nextBook = it.getJSONObject(i)
                             bookList.add(
                                 Book(
                                     nextBook.getString("book_title"),

@@ -42,17 +42,16 @@ class BookListFragment : Fragment() {
 
         with(view as RecyclerView) {
             layoutManager = LinearLayoutManager(requireActivity())
-
+            adapter = BookListAdapter(BookList(), onClick)
             bookViewModel.getBookList().observe(requireActivity()) {
-                adapter = BookListAdapter(it, onClick)
+                (adapter as BookListAdapter).bookList = it
                 adapter?.notifyDataSetChanged()
             }
         }
-
     }
 
     class BookListAdapter (_bookList: BookList, _onClick: (Book) -> Unit) : RecyclerView.Adapter<BookListAdapter.BookViewHolder>() {
-        private val bookList = _bookList
+        var bookList = _bookList
         private val onClick = _onClick
 
         inner class BookViewHolder (layout : View): RecyclerView.ViewHolder (layout) {
