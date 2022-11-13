@@ -33,8 +33,8 @@ class BookFragment : Fragment() {
         book?.run {
             titleTextView.text = title
             authorTextView.text = author
-            Picasso.get().load(coverURL) //this will load image
+            Picasso.get().load(coverURL).into(bookImageView)//this will load image
+
         }
     }
-
 }

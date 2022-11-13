@@ -9,24 +9,16 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.RequestQueue
-import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.squareup.picasso.Picasso
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
 
 class MainActivity : AppCompatActivity() {
 
     //for search button
     private lateinit var buttonSearch: Button
-
-    val volleyQueue : RequestQueue by lazy {
-        Volley.newRequestQueue(this)
-    }
+    lateinit var volleyQueue : RequestQueue
 
     private val isSingleContainer : Boolean by lazy {
         findViewById<View>(R.id.container2) == null
@@ -40,9 +32,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        bookViewModel.setBookList(BookList())
-        buttonSearch = findViewById(R.id.SearchButton)
+        handleIntent(intent)
 
+        bookViewModel.setBookList(BookList())
+
+        buttonSearch = findViewById(R.id.SearchButton)
 
         //when search button is clicked...
         buttonSearch.setOnClickListener {
@@ -50,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //type-to-search functionality
-//       setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
+       setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL)
 
         // If we're switching from one container to two containers
         // clear BookPlayerFragment from container1
@@ -60,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         // If this is the first time the activity is loading, go ahead and add a BookListFragment
         if (savedInstanceState == null) {
+            doMySearch("")
             supportFragmentManager.beginTransaction()
                 .add(R.id.container1, BookListFragment())
                 .commit()
@@ -94,28 +89,35 @@ class MainActivity : AppCompatActivity() {
                 bookViewModel.markSelectedBookViewed()
             }
         }
-
-        handleIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
-        setIntent(intent)
-        handleIntent(intent)
         super.onNewIntent(intent)
-    }
+        handleIntent(intent)
+        setIntent(intent)
+        buttonSearch = findViewById(R.id.SearchButton)
+        buttonSearch.setOnClickListener{
+            onSearchRequested()
+            }
+        }
 
-     fun handleIntent(intent: Intent?) {
-        //receiving the query...check
+     private fun handleIntent(intent: Intent?) {
+        volleyQueue = Volley.newRequestQueue(this)
+         //receiving the query...check
         if (Intent.ACTION_SEARCH == intent?.action)
         {
             intent.getStringExtra(SearchManager.QUERY)?.also{ query ->
                 doMySearch(query)
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.container1, BookListFragment())
+                    .addToBackStack(null)
+                    .commit()
             }
         }
     }
 
-    private fun doMySearch(i: String) {
-        val url = "https://kamorris.com/lab/flossplayer/search.php?query=${i}"
+     private fun doMySearch(search: String) {
+         val url = "https://kamorris.com/lab/flossplayer/search.php?query=${search}"
         volleyQueue.add (
             JsonArrayRequest(
                 com.android.volley.Request.Method.GET
@@ -123,7 +125,6 @@ class MainActivity : AppCompatActivity() {
                 , null
                 , {
                     try {
-                        // TODO: get books and parse them, update viewModel, clearSelectedBook
                         val bookList = BookList()
                         var nextBook: JSONObject
                         for (i in 0 until it.length()) {
@@ -134,10 +135,8 @@ class MainActivity : AppCompatActivity() {
                                     nextBook.getString("author_name"),
                                     nextBook.getInt("book_id"),
                                     nextBook.getString("cover_uri")
-                                )
-                            )
-                        }
-                        bookViewModel.setBookList(BookList())
+                                ))}
+                        bookViewModel.setBookList(bookList)
                         bookViewModel.clearSelectedBook()
 
                     } catch (e : JSONException) {
@@ -146,24 +145,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 , {
                     Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show()
-                })
-        )
-    }
-
-    //check with this
-    //val jargon: Boolean = intent.getBundleExtra(SearchManager.APP_DATA)?.getBoolean(JARGON) ?: false
-//    override fun onSearchRequested(): Boolean {
-////        val appData = Bundle().apply {
-////            //putBoolean(JARGON, true)
-////        }
-//        startSearch(null, false, appData, false)
-//        return true
-//    }
+                }))}
 
     override fun onBackPressed() {
         // BackPress clears the selected book
         bookViewModel.clearSelectedBook()
         super.onBackPressed()
-    }
-
-}
+    }}
