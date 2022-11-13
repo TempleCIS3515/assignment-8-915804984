@@ -23,7 +23,7 @@
     <Button
         android:id="@+id/SearchButton"
         android:layout_width="170dp"
-        android:layout_height="48dp"
+        android:layout_height="47dp"
         android:layout_marginStart="40dp"
         android:text="Search"
         app:layout_constraintBottom_toBottomOf="parent"
